@@ -17,12 +17,10 @@
 package org.springframework.cloud.gcp.autoconfigure.core;
 
 import com.google.api.gax.core.CredentialsProvider;
-import com.google.api.gax.core.NoCredentialsProvider;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.gcp.core.DefaultCredentialsProvider;
 import org.springframework.cloud.gcp.core.DefaultGcpProjectIdProvider;
@@ -48,13 +46,6 @@ public class GcpContextAutoConfiguration {
 
 	public GcpContextAutoConfiguration(GcpProperties gcpProperties) {
 		this.gcpProperties = gcpProperties;
-	}
-
-	@Bean
-	@ConditionalOnProperty("PUBSUB_EMULATOR_HOST")
-	@ConditionalOnMissingBean
-	public CredentialsProvider credentialsProvider() {
-		return NoCredentialsProvider.create();
 	}
 
 	@Bean
