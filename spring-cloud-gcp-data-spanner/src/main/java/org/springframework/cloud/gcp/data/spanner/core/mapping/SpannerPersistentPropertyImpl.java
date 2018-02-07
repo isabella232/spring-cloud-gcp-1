@@ -16,19 +16,21 @@
 
 package org.springframework.cloud.gcp.data.spanner.core.mapping;
 
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
+
 import org.springframework.data.mapping.Association;
-import org.springframework.data.mapping.MappingException;
 import org.springframework.data.mapping.PersistentEntity;
 import org.springframework.data.mapping.model.AnnotationBasedPersistentProperty;
 import org.springframework.data.mapping.model.FieldNamingStrategy;
-import org.springframework.data.mapping.model.Property;
+import org.springframework.data.mapping.model.MappingException;
 import org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
 import org.springframework.util.StringUtils;
 
 /**
- * Represents an implementation for {@link SpannerPersistentProperty}, which is a property of a
- * {@link SpannerPersistentEntity} stored in a Google Spanner table.
+ * Represents an implementation for {@link SpannerPersistentProperty}, which is a property
+ * of a {@link SpannerPersistentEntity} stored in a Google Spanner table.
  *
  * @author Ray Tsang
  * @author Chengyuan Zhao
@@ -42,15 +44,19 @@ public class SpannerPersistentPropertyImpl
 	/**
 	 * Creates a new {@link SpannerPersistentPropertyImpl}
 	 *
-	 * @param property the property to store
+	 * @param field the field to store
+	 * @param descriptor the property to store
 	 * @param owner the entity to which this property belongs
 	 * @param simpleTypeHolder
-	 * @param fieldNamingStrategy the naming strategy used to get the column name of this property
+	 * @param fieldNamingStrategy the naming strategy used to get the column name of this
+	 * property
 	 */
-	public SpannerPersistentPropertyImpl(Property property,
+	public SpannerPersistentPropertyImpl(
+			Field field,
+			PropertyDescriptor descriptor,
 			PersistentEntity<?, SpannerPersistentProperty> owner,
 			SimpleTypeHolder simpleTypeHolder, FieldNamingStrategy fieldNamingStrategy) {
-		super(property, owner, simpleTypeHolder);
+		super(field, descriptor, owner, simpleTypeHolder);
 		this.fieldNamingStrategy = fieldNamingStrategy == null
 				? PropertyNameFieldNamingStrategy.INSTANCE
 				: fieldNamingStrategy;
@@ -64,8 +70,8 @@ public class SpannerPersistentPropertyImpl
 	/**
 	 * Gets the name of the column in the Google Spanner table mapped to this property.
 	 * The column name is resolved using the {@link FieldNamingStrategy} passed in to the
-	 * {@link SpannerPersistentPropertyImpl#SpannerPersistentPropertyImpl(Property, PersistentEntity,
-	 * SimpleTypeHolder, FieldNamingStrategy)} constructor.
+	 * {@link SpannerPersistentPropertyImpl#SpannerPersistentPropertyImpl(Field, PropertyDescriptor,
+	 * PersistentEntity, SimpleTypeHolder, FieldNamingStrategy)} constructor.
 	 * This is by default the by default
 	 *
 	 * @return the name of the column.

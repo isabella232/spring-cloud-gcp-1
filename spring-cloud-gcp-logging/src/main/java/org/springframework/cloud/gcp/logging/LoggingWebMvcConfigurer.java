@@ -19,7 +19,7 @@ package org.springframework.cloud.gcp.logging;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
  * MVC Adapter that adds the {@link TraceIdLoggingWebMvcInterceptor}
@@ -28,7 +28,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @author Chengyuan Zhao
  */
 @Configuration
-public class LoggingWebMvcConfigurer implements WebMvcConfigurer {
+public class LoggingWebMvcConfigurer extends WebMvcConfigurerAdapter {
 
 	private final TraceIdLoggingWebMvcInterceptor interceptor;
 

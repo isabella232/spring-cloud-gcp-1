@@ -16,15 +16,18 @@
 
 package org.springframework.cloud.gcp.data.spanner.core.mapping;
 
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
+
 import org.springframework.data.mapping.context.AbstractMappingContext;
 import org.springframework.data.mapping.model.FieldNamingStrategy;
-import org.springframework.data.mapping.model.Property;
 import org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
 import org.springframework.data.util.TypeInformation;
 
 /**
- * A mapping context for Google Spanner that provides ways to create persistent entities and properties.
+ * A mapping context for Google Spanner that provides ways to create persistent entities
+ * and properties.
  *
  * @author Ray Tsang
  * @author Chengyuan Zhao
@@ -65,9 +68,12 @@ public class SpannerMappingContext extends
 	}
 
 	@Override
-	protected SpannerPersistentProperty createPersistentProperty(Property property,
-			SpannerPersistentEntity<?> owner, SimpleTypeHolder simpleTypeHolder) {
-		return new SpannerPersistentPropertyImpl(property, owner, simpleTypeHolder,
-				this.fieldNamingStrategy);
+	protected SpannerPersistentProperty createPersistentProperty(
+			Field field,
+			PropertyDescriptor descriptor,
+			SpannerPersistentEntity<?> owner,
+			SimpleTypeHolder simpleTypeHolder
+	) {
+		return new SpannerPersistentPropertyImpl(field, descriptor, owner, simpleTypeHolder, this.fieldNamingStrategy);
 	}
 }

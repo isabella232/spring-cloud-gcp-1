@@ -93,8 +93,7 @@ public class PubSubMessageHandler extends AbstractMessageHandler {
 		}
 
 		Map<String, String> headers = new HashMap<>();
-		message.getHeaders().forEach(
-				(key, value) -> headers.put(key, value.toString()));
+		message.getHeaders().forEach((key, value) -> headers.put(key, value.toString()));
 
 		ListenableFuture<String> pubsubFuture =
 				this.pubSubTemplate.publish(this.topic, pubsubPayload, headers);

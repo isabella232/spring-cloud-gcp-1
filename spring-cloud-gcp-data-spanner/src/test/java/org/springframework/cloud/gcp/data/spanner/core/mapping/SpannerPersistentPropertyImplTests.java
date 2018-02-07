@@ -18,17 +18,17 @@ package org.springframework.cloud.gcp.data.spanner.core.mapping;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mapping.MappingException;
 import org.springframework.data.mapping.model.FieldNamingStrategy;
+import org.springframework.data.mapping.model.MappingException;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -51,7 +51,7 @@ public class SpannerPersistentPropertyImplTests {
 	public void testNullColumnName() {
 		SpannerMappingContext context = new SpannerMappingContext();
 		FieldNamingStrategy namingStrat = mock(FieldNamingStrategy.class);
-		when(namingStrat.getFieldName(any())).thenReturn(null);
+		when(namingStrat.getFieldName(Matchers.any())).thenReturn(null);
 		context.setFieldNamingStrategy(namingStrat);
 		SpannerPersistentEntityImpl<TestEntity> entity =
 				(SpannerPersistentEntityImpl<TestEntity>) (context

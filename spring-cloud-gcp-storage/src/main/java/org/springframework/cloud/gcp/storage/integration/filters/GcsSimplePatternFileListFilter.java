@@ -34,7 +34,6 @@ public class GcsSimplePatternFileListFilter extends AbstractSimplePatternFileLis
 		return blobInfo != null ? blobInfo.getName() : null;
 	}
 
-	@Override
 	protected boolean isDirectory(BlobInfo blobInfo) {
 		return blobInfo.isDirectory();
 	}

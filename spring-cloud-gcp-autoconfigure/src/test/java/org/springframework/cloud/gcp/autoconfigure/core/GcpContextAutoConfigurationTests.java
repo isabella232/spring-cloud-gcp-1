@@ -21,7 +21,7 @@ import com.google.auth.Credentials;
 import org.junit.After;
 import org.junit.Test;
 
-import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.boot.test.util.EnvironmentTestUtils;
 import org.springframework.cloud.gcp.core.DefaultGcpProjectIdProvider;
 import org.springframework.cloud.gcp.core.GcpProjectIdProvider;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -58,15 +58,14 @@ public class GcpContextAutoConfigurationTests {
 	@Test
 	public void testGetProjectIdProvider_withoutGcpProperties() {
 		loadEnvironment();
-		assertTrue(this.context.getBean(GcpProjectIdProvider.class)
-				instanceof DefaultGcpProjectIdProvider);
+		assertTrue(this.context.getBean(GcpProjectIdProvider.class) instanceof DefaultGcpProjectIdProvider);
 	}
 
 	private void loadEnvironment(String... environment) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(GcpContextAutoConfiguration.class);
 		context.register(this.getClass());
-		TestPropertyValues.of(environment).applyTo(context);
+		EnvironmentTestUtils.addEnvironment(context, environment);
 		context.refresh();
 		this.context = context;
 	}

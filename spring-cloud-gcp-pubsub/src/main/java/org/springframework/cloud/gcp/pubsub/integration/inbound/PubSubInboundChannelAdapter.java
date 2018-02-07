@@ -16,20 +16,18 @@
 
 package org.springframework.cloud.gcp.pubsub.integration.inbound;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.function.Function;
 
 import com.google.cloud.pubsub.v1.AckReplyConsumer;
 import com.google.cloud.pubsub.v1.Subscriber;
+import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.PubsubMessage;
 
 import org.springframework.cloud.gcp.pubsub.core.PubSubOperations;
 import org.springframework.cloud.gcp.pubsub.integration.AckMode;
 import org.springframework.cloud.gcp.pubsub.support.GcpHeaders;
 import org.springframework.integration.endpoint.MessageProducerSupport;
-import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.converter.MessageConverter;
-import org.springframework.messaging.converter.StringMessageConverter;
+import org.springframework.integration.support.AbstractIntegrationMessageBuilder;
 import org.springframework.util.Assert;
 
 /**
@@ -48,39 +46,31 @@ public class PubSubInboundChannelAdapter extends MessageProducerSupport {
 
 	private AckMode ackMode = AckMode.AUTO;
 
-	private MessageConverter messageConverter;
+	private Function<ByteString, ?> payloadExtractor;
 
 	public PubSubInboundChannelAdapter(PubSubOperations pubSubTemplate, String subscriptionName) {
 		this.pubSubTemplate = pubSubTemplate;
 		this.subscriptionName = subscriptionName;
-
-		StringMessageConverter stringMessageConverter = new StringMessageConverter();
-		stringMessageConverter.setSerializedPayloadClass(String.class);
-		this.messageConverter = stringMessageConverter;
+		this.payloadExtractor = ByteString::toStringUtf8;
 	}
 
 	@Override
 	protected void doStart() {
 		super.doStart();
 
-		this.subscriber =
-				this.pubSubTemplate.subscribe(this.subscriptionName, this::receiveMessage);
+		this.subscriber = this.pubSubTemplate.subscribe(this.subscriptionName, this::receiveMessage);
 	}
 
 	private void receiveMessage(PubsubMessage message, AckReplyConsumer consumer) {
-		Map<String, Object> messageHeaders = new HashMap<>();
-
-		message.getAttributesMap().forEach(messageHeaders::put);
-
-		if (this.ackMode == AckMode.MANUAL) {
-			// Send the consumer downstream so user decides on when to ack/nack.
-			messageHeaders.put(GcpHeaders.ACKNOWLEDGEMENT, consumer);
-		}
-
 		try {
-			sendMessage(this.messageConverter.toMessage(
-					message.getData().toStringUtf8(),
-					new MessageHeaders(messageHeaders)));
+			AbstractIntegrationMessageBuilder<?> messageBuilder = getMessageBuilderFactory()
+					.withPayload(this.payloadExtractor.apply(message.getData()));
+			messageBuilder.copyHeaders(message.getAttributesMap());
+			if (this.ackMode == AckMode.MANUAL) {
+				// Send the consumer downstream so user decides on when to ack/nack.
+				messageBuilder.setHeader(GcpHeaders.ACKNOWLEDGEMENT, consumer);
+			}
+			sendMessage(messageBuilder.build());
 		}
 		catch (RuntimeException re) {
 			if (this.ackMode == AckMode.AUTO) {
@@ -112,13 +102,12 @@ public class PubSubInboundChannelAdapter extends MessageProducerSupport {
 		this.ackMode = ackMode;
 	}
 
-	public void setMessageConverter(MessageConverter messageConverter) {
-		Assert.notNull(messageConverter,
-				"The specified message converter can't be null.");
-		this.messageConverter = messageConverter;
+	public void setPayloadExtractor(Function<ByteString, ?> payloadExtractor) {
+		Assert.notNull(payloadExtractor, "The specified payload extractor can't be null.");
+		this.payloadExtractor = payloadExtractor;
 	}
 
-	public MessageConverter getMessageConverter() {
-		return this.messageConverter;
+	public Function<ByteString, ?> getPayloadExtractor() {
+		return this.payloadExtractor;
 	}
 }

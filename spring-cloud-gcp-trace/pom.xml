@@ -20,6 +20,10 @@
 			<artifactId>spring-cloud-sleuth-core</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.google.cloud</groupId>
 			<artifactId>google-cloud-trace</artifactId>
 		</dependency>

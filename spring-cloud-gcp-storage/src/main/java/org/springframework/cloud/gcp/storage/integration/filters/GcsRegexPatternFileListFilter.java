@@ -40,7 +40,6 @@ public class GcsRegexPatternFileListFilter extends AbstractRegexPatternFileListF
 		return blobInfo != null ? blobInfo.getName() : null;
 	}
 
-	@Override
 	protected boolean isDirectory(BlobInfo blobInfo) {
 		return blobInfo.isDirectory();
 	}

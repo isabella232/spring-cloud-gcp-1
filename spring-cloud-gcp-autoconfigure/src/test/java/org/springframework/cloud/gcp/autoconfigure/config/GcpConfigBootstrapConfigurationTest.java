@@ -19,7 +19,7 @@ package org.springframework.cloud.gcp.autoconfigure.config;
 import org.junit.After;
 import org.junit.Test;
 
-import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.boot.test.util.EnvironmentTestUtils;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import static org.junit.Assert.assertEquals;
@@ -65,7 +65,7 @@ public class GcpConfigBootstrapConfigurationTest {
 
 	private void loadEnvironment(String... environment) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		TestPropertyValues.of(environment).applyTo(context);
+		EnvironmentTestUtils.addEnvironment(context, environment);
 		context.register(GcpConfigBootstrapConfiguration.class);
 		context.refresh();
 		this.context = context;

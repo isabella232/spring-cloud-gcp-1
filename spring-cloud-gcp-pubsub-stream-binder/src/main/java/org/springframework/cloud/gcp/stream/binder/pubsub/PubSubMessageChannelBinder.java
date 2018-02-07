@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.gcp.stream.binder.pubsub;
 
+import com.google.protobuf.ByteString;
+
 import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
 import org.springframework.cloud.gcp.pubsub.integration.inbound.PubSubInboundChannelAdapter;
 import org.springframework.cloud.gcp.pubsub.integration.outbound.PubSubMessageHandler;
@@ -45,12 +47,11 @@ public class PubSubMessageChannelBinder
 
 	private PubSubTemplate pubSubTemplate;
 
-	private PubSubExtendedBindingProperties pubSubExtendedBindingProperties =
-			new PubSubExtendedBindingProperties();
+	private PubSubExtendedBindingProperties pubSubExtendedBindingProperties = new PubSubExtendedBindingProperties();
 
 	public PubSubMessageChannelBinder(String[] headersToEmbed,
 			PubSubChannelProvisioner provisioningProvider, PubSubTemplate pubSubTemplate) {
-		super(headersToEmbed, provisioningProvider);
+		super(true, headersToEmbed, provisioningProvider);
 		this.pubSubTemplate = pubSubTemplate;
 	}
 
@@ -70,7 +71,11 @@ public class PubSubMessageChannelBinder
 
 		String subscription = this.provisioningProvider.createSubscription(destination.getName(), group, properties);
 
-		return new PubSubInboundChannelAdapter(this.pubSubTemplate, subscription);
+		PubSubInboundChannelAdapter channelAdapter = new PubSubInboundChannelAdapter(this.pubSubTemplate, subscription);
+		if (properties.getExtension().isUseBinaryProtocol()) {
+			channelAdapter.setPayloadExtractor(ByteString::toByteArray);
+		}
+		return channelAdapter;
 	}
 
 	@Override

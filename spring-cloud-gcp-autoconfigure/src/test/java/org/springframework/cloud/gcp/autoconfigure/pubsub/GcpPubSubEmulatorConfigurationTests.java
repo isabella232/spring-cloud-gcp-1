@@ -24,7 +24,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
-import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.boot.test.util.EnvironmentTestUtils;
 import org.springframework.cloud.gcp.autoconfigure.core.GcpContextAutoConfiguration;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -59,7 +59,7 @@ public class GcpPubSubEmulatorConfigurationTests {
 
 	private void loadEnvironment(String... environment) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		TestPropertyValues.of(environment).applyTo(context);
+		EnvironmentTestUtils.addEnvironment(context, environment);
 		context.register(
 				GcpPubSubEmulatorConfiguration.class,
 				GcpContextAutoConfiguration.class,
