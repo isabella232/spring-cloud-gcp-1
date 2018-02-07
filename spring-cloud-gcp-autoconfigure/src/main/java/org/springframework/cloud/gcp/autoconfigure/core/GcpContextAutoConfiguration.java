@@ -28,10 +28,10 @@ import org.springframework.cloud.gcp.core.GcpProjectIdProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-
 /**
- * Base starter for Google Cloud Projects. Provides defaults for {@link com.google.auth.oauth2.GoogleCredentials}.
- * Binds properties from {@link GcpProperties}.
+ * Base starter for Google Cloud Projects. Provides defaults for
+ * {@link com.google.auth.oauth2.GoogleCredentials}. Binds properties from
+ * {@link GcpProperties}.
  *
  * @author Vinicius Carvalho
  * @author João André Martins
@@ -56,16 +56,15 @@ public class GcpContextAutoConfiguration {
 	}
 
 	/**
-	 * @return a {@link GcpProjectIdProvider} that returns the project ID in the properties or, if
-	 * none, the project ID from the GOOGLE_CLOUD_PROJECT envvar and Metadata Server
+	 * @return a {@link GcpProjectIdProvider} that returns the project ID in the properties
+	 * or, if none, the project ID from the GOOGLE_CLOUD_PROJECT envvar and Metadata Server
 	 */
 	@Bean
 	@ConditionalOnMissingBean
 	public GcpProjectIdProvider gcpProjectIdProvider() {
-		GcpProjectIdProvider projectIdProvider =
-				this.gcpProperties.getProjectId() != null
-						? () -> this.gcpProperties.getProjectId()
-						: new DefaultGcpProjectIdProvider();
+		GcpProjectIdProvider projectIdProvider = this.gcpProperties.getProjectId() != null
+				? () -> this.gcpProperties.getProjectId()
+				: new DefaultGcpProjectIdProvider();
 
 		if (LOGGER.isInfoEnabled()) {
 			LOGGER.info("The default project ID is " + projectIdProvider.getProjectId());
