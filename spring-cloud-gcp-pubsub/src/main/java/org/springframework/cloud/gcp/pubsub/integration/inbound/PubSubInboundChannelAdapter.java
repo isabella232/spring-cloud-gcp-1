@@ -16,18 +16,22 @@
 
 package org.springframework.cloud.gcp.pubsub.integration.inbound;
 
-import java.util.function.Function;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.google.cloud.pubsub.v1.AckReplyConsumer;
 import com.google.cloud.pubsub.v1.Subscriber;
-import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.PubsubMessage;
 
 import org.springframework.cloud.gcp.pubsub.core.PubSubOperations;
 import org.springframework.cloud.gcp.pubsub.integration.AckMode;
 import org.springframework.cloud.gcp.pubsub.support.GcpHeaders;
 import org.springframework.integration.endpoint.MessageProducerSupport;
-import org.springframework.integration.support.AbstractIntegrationMessageBuilder;
+import org.springframework.integration.support.MessageBuilder;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.util.Assert;
 
 /**
@@ -46,31 +50,45 @@ public class PubSubInboundChannelAdapter extends MessageProducerSupport {
 
 	private AckMode ackMode = AckMode.AUTO;
 
-	private Function<ByteString, ?> payloadExtractor;
+	private MessageConverter messageConverter;
 
 	public PubSubInboundChannelAdapter(PubSubOperations pubSubTemplate, String subscriptionName) {
 		this.pubSubTemplate = pubSubTemplate;
 		this.subscriptionName = subscriptionName;
-		this.payloadExtractor = ByteString::toStringUtf8;
+
+		StringMessageConverter stringMessageConverter = new StringMessageConverter();
+		stringMessageConverter.setSerializedPayloadClass(String.class);
+		this.messageConverter = stringMessageConverter;
 	}
 
 	@Override
 	protected void doStart() {
 		super.doStart();
 
-		this.subscriber = this.pubSubTemplate.subscribe(this.subscriptionName, this::receiveMessage);
+		this.subscriber =
+				this.pubSubTemplate.subscribe(this.subscriptionName, this::receiveMessage);
 	}
 
-	private void receiveMessage(PubsubMessage message, AckReplyConsumer consumer) {
+	private void receiveMessage(PubsubMessage pubsubMessage, AckReplyConsumer consumer) {
+		Map<String, Object> messageHeaders = new HashMap<>();
+
+		pubsubMessage.getAttributesMap().forEach(messageHeaders::put);
+
+		if (this.ackMode == AckMode.MANUAL) {
+			// Send the consumer downstream so user decides on when to ack/nack.
+			messageHeaders.put(GcpHeaders.ACKNOWLEDGEMENT, consumer);
+		}
+
 		try {
-			AbstractIntegrationMessageBuilder<?> messageBuilder = getMessageBuilderFactory()
-					.withPayload(this.payloadExtractor.apply(message.getData()));
-			messageBuilder.copyHeaders(message.getAttributesMap());
-			if (this.ackMode == AckMode.MANUAL) {
-				// Send the consumer downstream so user decides on when to ack/nack.
-				messageBuilder.setHeader(GcpHeaders.ACKNOWLEDGEMENT, consumer);
-			}
-			sendMessage(messageBuilder.build());
+			Message<?> internalMessage =
+					this.messageConverter == null
+							? MessageBuilder.withPayload(pubsubMessage.getData().toByteArray())
+							.copyHeaders(messageHeaders)
+							.build()
+							: this.messageConverter.toMessage(pubsubMessage.getData().toByteArray(),
+							new MessageHeaders(messageHeaders));
+
+			sendMessage(internalMessage);
 		}
 		catch (RuntimeException re) {
 			if (this.ackMode == AckMode.AUTO) {
@@ -102,12 +120,18 @@ public class PubSubInboundChannelAdapter extends MessageProducerSupport {
 		this.ackMode = ackMode;
 	}
 
-	public void setPayloadExtractor(Function<ByteString, ?> payloadExtractor) {
-		Assert.notNull(payloadExtractor, "The specified payload extractor can't be null.");
-		this.payloadExtractor = payloadExtractor;
+	public MessageConverter getMessageConverter() {
+		return this.messageConverter;
 	}
 
-	public Function<ByteString, ?> getPayloadExtractor() {
-		return this.payloadExtractor;
+	/**
+	 * Sets the {@link MessageConverter} to convert the payload of the incoming message from
+	 * Pub/Sub.
+	 * If {@code messageConverter} is null, the payload of the Pub/Sub message is converted to
+	 * {@code byte[]} and returned in that form.
+	 * @param messageConverter converts the payload of the incoming message from Pub/Sub
+	 */
+	public void setMessageConverter(MessageConverter messageConverter) {
+		this.messageConverter = messageConverter;
 	}
 }

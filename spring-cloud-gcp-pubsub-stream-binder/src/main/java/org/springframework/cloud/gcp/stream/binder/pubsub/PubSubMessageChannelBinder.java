@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.gcp.stream.binder.pubsub;
 
-import com.google.protobuf.ByteString;
-
 import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
 import org.springframework.cloud.gcp.pubsub.integration.inbound.PubSubInboundChannelAdapter;
 import org.springframework.cloud.gcp.pubsub.integration.outbound.PubSubMessageHandler;
@@ -47,7 +45,8 @@ public class PubSubMessageChannelBinder
 
 	private PubSubTemplate pubSubTemplate;
 
-	private PubSubExtendedBindingProperties pubSubExtendedBindingProperties = new PubSubExtendedBindingProperties();
+	private PubSubExtendedBindingProperties pubSubExtendedBindingProperties =
+			new PubSubExtendedBindingProperties();
 
 	public PubSubMessageChannelBinder(String[] headersToEmbed,
 			PubSubChannelProvisioner provisioningProvider, PubSubTemplate pubSubTemplate) {
@@ -59,23 +58,18 @@ public class PubSubMessageChannelBinder
 	protected MessageHandler createProducerMessageHandler(ProducerDestination destination,
 			ExtendedProducerProperties<PubSubProducerProperties> producerProperties,
 			MessageChannel errorChannel) {
-
-		this.provisioningProvider.provisionProducerDestination(destination.getName(), producerProperties);
-
 		return new PubSubMessageHandler(this.pubSubTemplate, destination.getName());
 	}
 
 	@Override
 	protected MessageProducer createConsumerEndpoint(ConsumerDestination destination, String group,
 			ExtendedConsumerProperties<PubSubConsumerProperties> properties) {
+		PubSubInboundChannelAdapter inboundAdapter =
+				new PubSubInboundChannelAdapter(this.pubSubTemplate, destination.getName());
+		// Lets Stream do the message payload conversion.
+		inboundAdapter.setMessageConverter(null);
 
-		String subscription = this.provisioningProvider.createSubscription(destination.getName(), group, properties);
-
-		PubSubInboundChannelAdapter channelAdapter = new PubSubInboundChannelAdapter(this.pubSubTemplate, subscription);
-		if (properties.getExtension().isUseBinaryProtocol()) {
-			channelAdapter.setPayloadExtractor(ByteString::toByteArray);
-		}
-		return channelAdapter;
+		return inboundAdapter;
 	}
 
 	@Override
@@ -87,5 +81,6 @@ public class PubSubMessageChannelBinder
 	public PubSubProducerProperties getExtendedProducerProperties(String channelName) {
 		return this.pubSubExtendedBindingProperties.getExtendedProducerProperties(channelName);
 	}
+
 
 }

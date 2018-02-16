@@ -1,5 +1,5 @@
 /*
- *  Copyright 2017 original author or authors.
+ *  Copyright 2018 original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -24,26 +24,33 @@ import com.google.api.gax.rpc.TransportChannelProvider;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.gcp.autoconfigure.core.GcpContextAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * If <code>spring.cloud.gcp.pubsub.emulatorHost</code> is set, spring stream will connect
+ * to a running pub/sub emulator.
+ *
  * @author Andreas Berger
  */
 @Configuration
-@ConditionalOnProperty("PUBSUB_EMULATOR_HOST")
+@ConditionalOnProperty(prefix = "spring.cloud.gcp.pubsub", name = "emulatorHost")
 @AutoConfigureBefore(GcpContextAutoConfiguration.class)
+@EnableConfigurationProperties(GcpPubSubProperties.class)
 public class GcpPubSubEmulatorConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public TransportChannelProvider transportChannelProvider(@Value("${PUBSUB_EMULATOR_HOST}") String hostport) {
-		ManagedChannel channel = ManagedChannelBuilder.forTarget(hostport).usePlaintext(true).build();
+	public TransportChannelProvider transportChannelProvider(GcpPubSubProperties gcpPubSubProperties) {
+		ManagedChannel channel = ManagedChannelBuilder
+				.forTarget(gcpPubSubProperties.getEmulatorHost())
+				.usePlaintext(true)
+				.build();
 		return FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));
 	}
 

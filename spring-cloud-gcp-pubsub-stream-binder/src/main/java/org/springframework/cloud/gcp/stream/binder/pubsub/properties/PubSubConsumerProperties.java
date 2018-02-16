@@ -23,8 +23,6 @@ public class PubSubConsumerProperties {
 
 	private boolean autoCreateResources = true;
 
-	private boolean useBinaryProtocol = true;
-
 	public boolean isAutoCreateResources() {
 		return this.autoCreateResources;
 	}
@@ -33,11 +31,4 @@ public class PubSubConsumerProperties {
 		this.autoCreateResources = autoCreateResources;
 	}
 
-	public boolean isUseBinaryProtocol() {
-		return this.useBinaryProtocol;
-	}
-
-	public void setUseBinaryProtocol(boolean useBinaryProtocol) {
-		this.useBinaryProtocol = useBinaryProtocol;
-	}
 }

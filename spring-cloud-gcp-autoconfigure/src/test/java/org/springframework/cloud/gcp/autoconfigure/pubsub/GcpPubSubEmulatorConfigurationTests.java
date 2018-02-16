@@ -1,5 +1,5 @@
 /*
- *  Copyright 2017 original author or authors.
+ *  Copyright 2018 original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -47,7 +47,8 @@ public class GcpPubSubEmulatorConfigurationTests {
 	@Test
 	public void testEmulatorConfig() {
 		// loadEnvironment();
-		loadEnvironment("PUBSUB_EMULATOR_HOST=localhost:8085");
+		loadEnvironment("spring.cloud.gcp.pubsub.emulatorHost=localhost:8085",
+				"spring.cloud.gcp.projectId=test-project");
 		CredentialsProvider credentialsProvider = this.context.getBean(CredentialsProvider.class);
 		Assert.assertTrue("CredentialsProvider is not correct",
 				credentialsProvider instanceof NoCredentialsProvider);
