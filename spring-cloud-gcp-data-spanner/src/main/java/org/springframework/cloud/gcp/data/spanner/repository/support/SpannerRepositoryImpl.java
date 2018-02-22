@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.gcp.data.spanner.repository.support;
 
-import java.util.Optional;
+import java.io.Serializable;
 
 import com.google.cloud.spanner.Key;
 import com.google.cloud.spanner.KeySet;
@@ -55,7 +55,7 @@ public class SpannerRepositoryImpl implements SpannerRepository {
 	}
 
 	@Override
-	public Iterable saveAll(Iterable entities) {
+	public Iterable save(Iterable entities) {
 		Assert.notNull(entities, "A non-null list of entities is required for saving.");
 		for (Object entity : entities) {
 			save(entity);
@@ -64,15 +64,15 @@ public class SpannerRepositoryImpl implements SpannerRepository {
 	}
 
 	@Override
-	public Optional findById(Object o) {
+	public Object findOne(Serializable o) {
 		Assert.notNull(o, "A non-null ID is required.");
-		return Optional.ofNullable(this.spannerOperations.find(this.entityType, Key.of(o)));
+		return this.spannerOperations.find(this.entityType, Key.of(o));
 	}
 
 	@Override
-	public boolean existsById(Object o) {
+	public boolean exists(Serializable o) {
 		Assert.notNull(o, "A non-null ID is required.");
-		return findById(o).isPresent();
+		return findOne(o) != null;
 	}
 
 	@Override
@@ -81,7 +81,7 @@ public class SpannerRepositoryImpl implements SpannerRepository {
 	}
 
 	@Override
-	public Iterable findAllById(Iterable iterable) {
+	public Iterable findAll(Iterable iterable) {
 		KeySet.Builder builder = KeySet.newBuilder();
 		for (Object id : iterable) {
 			builder.addKey(Key.of(id));
@@ -95,7 +95,7 @@ public class SpannerRepositoryImpl implements SpannerRepository {
 	}
 
 	@Override
-	public void deleteById(Object o) {
+	public void delete(Serializable o) {
 		Assert.notNull(o, "A non-null ID is required.");
 		this.spannerOperations.delete(this.entityType, Key.of(o));
 	}
@@ -107,7 +107,7 @@ public class SpannerRepositoryImpl implements SpannerRepository {
 	}
 
 	@Override
-	public void deleteAll(Iterable entities) {
+	public void delete(Iterable entities) {
 		Assert.notNull(entities, "A non-null list of entities is required.");
 		this.spannerOperations.delete(this.entityType, entities);
 	}

@@ -16,10 +16,12 @@
 
 package org.springframework.cloud.gcp.data.spanner.repository.support;
 
+import java.io.Serializable;
+
 import org.springframework.cloud.gcp.data.spanner.core.SpannerOperations;
 import org.springframework.cloud.gcp.data.spanner.core.mapping.SpannerMappingContext;
 import org.springframework.cloud.gcp.data.spanner.core.mapping.SpannerPersistentEntity;
-import org.springframework.data.mapping.MappingException;
+import org.springframework.data.mapping.model.MappingException;
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.data.repository.core.RepositoryMetadata;
@@ -54,7 +56,7 @@ public class SpannerRepositoryFactory extends RepositoryFactorySupport {
 	}
 
 	@Override
-	public <T, ID> EntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
+	public <T, ID extends Serializable> EntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
 		SpannerPersistentEntity<?> entity = this.spannerMappingContext
 				.getPersistentEntity(domainClass);
 

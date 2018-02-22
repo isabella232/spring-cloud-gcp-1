@@ -69,37 +69,37 @@ public class SpannerRepositoryImplTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void findNullIdTest() {
 		new SpannerRepositoryImpl(mock(SpannerOperations.class), Object.class)
-				.findById(null);
+				.findOne(null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void existsNullIdTest() {
 		new SpannerRepositoryImpl(mock(SpannerOperations.class), Object.class)
-				.existsById(null);
+				.exists(null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void deleteNullIdTest() {
 		new SpannerRepositoryImpl(mock(SpannerOperations.class), Object.class)
-				.deleteById(null);
+				.delete((Object) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void deleteNullEntityTest() {
 		new SpannerRepositoryImpl(mock(SpannerOperations.class), Object.class)
-				.delete(null);
+				.delete((Object) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void deleteAllNullEntityTest() {
 		new SpannerRepositoryImpl(mock(SpannerOperations.class), Object.class)
-				.deleteAll(null);
+				.delete((Iterable) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void saveAllNullEntityTest() {
 		new SpannerRepositoryImpl(mock(SpannerOperations.class), Object.class)
-				.saveAll(null);
+				.save((Iterable) null);
 	}
 
 	@Test
@@ -116,7 +116,7 @@ public class SpannerRepositoryImplTests {
 		Object ob = new Object();
 		Object ob2 = new Object();
 		Iterable<Object> ret = new SpannerRepositoryImpl(operations, Object.class)
-				.saveAll(Arrays.asList(ob, ob2));
+				.save(Arrays.asList(ob, ob2));
 		assertThat(ret, containsInAnyOrder(ob, ob2));
 		verify(operations, times(1)).upsert(eq(ob));
 		verify(operations, times(1)).upsert(eq(ob2));
@@ -129,7 +129,7 @@ public class SpannerRepositoryImplTests {
 		Object ret = new Object();
 		when(operations.find(eq(Object.class), eq(Key.of(key)))).thenReturn(ret);
 		assertEquals(ret,
-				new SpannerRepositoryImpl(operations, Object.class).findById(key).get());
+				new SpannerRepositoryImpl(operations, Object.class).findOne(key));
 		verify(operations, times(1)).find(eq(Object.class), eq(Key.of(key)));
 	}
 
@@ -139,7 +139,7 @@ public class SpannerRepositoryImplTests {
 		String key = "key";
 		Object ret = new Object();
 		when(operations.find(eq(Object.class), eq(Key.of(key)))).thenReturn(ret);
-		assertTrue(new SpannerRepositoryImpl(operations, Object.class).existsById(key));
+		assertTrue(new SpannerRepositoryImpl(operations, Object.class).exists(key));
 	}
 
 	@Test
@@ -147,7 +147,7 @@ public class SpannerRepositoryImplTests {
 		SpannerOperations operations = mock(SpannerOperations.class);
 		when(operations.find(eq(Object.class), any())).thenReturn(null);
 		assertFalse(
-				new SpannerRepositoryImpl(operations, Object.class).existsById("key"));
+				new SpannerRepositoryImpl(operations, Object.class).exists("key"));
 	}
 
 	@Test
@@ -166,7 +166,7 @@ public class SpannerRepositoryImplTests {
 			return null;
 		});
 		new SpannerRepositoryImpl(operations, Object.class)
-				.findAllById(Arrays.asList("key1", "key2"));
+				.findAll(Arrays.asList("key1", "key2"));
 	}
 
 	@Test
@@ -180,7 +180,7 @@ public class SpannerRepositoryImplTests {
 	public void deleteByIdTest() {
 		SpannerOperations operations = mock(SpannerOperations.class);
 		String key = "key";
-		new SpannerRepositoryImpl(operations, Object.class).deleteById(key);
+		new SpannerRepositoryImpl(operations, Object.class).delete(key);
 		verify(operations, times(1)).delete(eq(Object.class), eq(Key.of(key)));
 	}
 
@@ -201,7 +201,7 @@ public class SpannerRepositoryImplTests {
 			assertThat(toDelete, containsInAnyOrder("ob1", "ob2"));
 			return null;
 		}).when(operations).delete(eq(String.class), same(obs));
-		new SpannerRepositoryImpl(operations, Object.class).deleteAll(obs);
+		new SpannerRepositoryImpl(operations, Object.class).delete(obs);
 	}
 
 	@Test
