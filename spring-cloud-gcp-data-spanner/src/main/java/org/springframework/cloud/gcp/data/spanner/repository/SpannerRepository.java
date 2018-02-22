@@ -1,5 +1,5 @@
 /*
- *  Copyright 2017 original author or authors.
+ *  Copyright 2018 original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -14,23 +14,21 @@
  *  limitations under the License.
  */
 
-package org.springframework.cloud.gcp.storage;
+package org.springframework.cloud.gcp.data.spanner.repository;
+
+import org.springframework.cloud.gcp.data.spanner.core.SpannerOperations;
+import org.springframework.data.repository.CrudRepository;
 
 /**
- * Holds settings for use with the {@link GoogleStorageResource}. These settings are optional.
- *
+ * @author Ray Tsang
  * @author Chengyuan Zhao
  */
-public class GoogleStorageProtocolResolverSettings {
+public interface SpannerRepository extends CrudRepository {
 
-	/** Determines if blobs should be auto-created when the library attempts to write to them. */
-	private boolean autoCreateFiles = true;
-
-	public boolean isAutoCreateFiles() {
-		return this.autoCreateFiles;
-	}
-
-	public void setAutoCreateFiles(boolean autoCreateFiles) {
-		this.autoCreateFiles = autoCreateFiles;
-	}
+	/**
+	 * Gets a {@link SpannerOperations}, which allows more-direct access to Google Spanner
+	 * functions.
+	 * @return the operations object providing Spanner functions.
+	 */
+	SpannerOperations getSpannerOperations();
 }

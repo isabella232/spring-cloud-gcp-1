@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package org.springframework.cloud.gcp.data.spanner.core.mapping;
+package org.springframework.cloud.gcp.data.spanner.core.convert;
 
 import java.util.List;
 
@@ -30,17 +30,17 @@ import org.springframework.data.convert.EntityWriter;
  *
  * @author Ray Tsang
  * @author Chengyuan Zhao
+ * @author Balint Pato
  */
-public interface SpannerObjectMapper
-		extends EntityReader<Object, Struct>, EntityWriter<Object, Mutation> {
+public interface SpannerConverter
+		extends EntityReader<Object, Struct>, EntityWriter<Object, Mutation.WriteBuilder> {
 
 	/**
-	 * Converts a set of Spanner results into a list of objects.
+	 * Converts a set of Spanner {@link ResultSet} into a list of objects.
 	 * @param resultSet The Spanner results to convert.
 	 * @param entityClass The type of the objects the Spanner results represent.
 	 * @param <T> The type of the objects the Spanner results represent.
 	 * @return A list of objects.
 	 */
-	<T> List<T> mapToUnmodifiableList(ResultSet resultSet, Class<T> entityClass);
-
+	<T> List<T> mapToList(ResultSet resultSet, Class<T> entityClass);
 }

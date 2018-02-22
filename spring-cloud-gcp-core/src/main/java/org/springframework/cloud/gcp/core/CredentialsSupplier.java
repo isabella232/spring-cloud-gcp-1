@@ -1,5 +1,5 @@
 /*
- *  Copyright 2017 original author or authors.
+ *  Copyright 2018 original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -14,23 +14,21 @@
  *  limitations under the License.
  */
 
-package org.springframework.cloud.gcp.storage;
+package org.springframework.cloud.gcp.core;
 
 /**
- * Holds settings for use with the {@link GoogleStorageResource}. These settings are optional.
+ * An interface meant to be implemented by configuration properties POJOs that store information about
+ * Google Cloud credentials.
  *
- * @author Chengyuan Zhao
+ * @author Mike Eltsufin
  */
-public class GoogleStorageProtocolResolverSettings {
+public interface CredentialsSupplier {
 
-	/** Determines if blobs should be auto-created when the library attempts to write to them. */
-	private boolean autoCreateFiles = true;
+	/**
+	 * Supplies credentials configuration.
+	 *
+	 * @return POJO containing Google Cloud credentials location and scopes
+	 */
+	Credentials getCredentials();
 
-	public boolean isAutoCreateFiles() {
-		return this.autoCreateFiles;
-	}
-
-	public void setAutoCreateFiles(boolean autoCreateFiles) {
-		this.autoCreateFiles = autoCreateFiles;
-	}
 }

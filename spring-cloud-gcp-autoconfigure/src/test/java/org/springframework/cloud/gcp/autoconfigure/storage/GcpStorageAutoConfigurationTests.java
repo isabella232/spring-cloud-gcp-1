@@ -36,7 +36,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.cloud.gcp.autoconfigure.core.GcpContextAutoConfiguration;
 import org.springframework.cloud.gcp.autoconfigure.sql.GcpCloudSqlAutoConfiguration;
 import org.springframework.cloud.gcp.core.GcpProjectIdProvider;
-import org.springframework.cloud.gcp.storage.GoogleStorageResourceObject;
+import org.springframework.cloud.gcp.storage.GoogleStorageResource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -77,8 +77,8 @@ public class GcpStorageAutoConfigurationTests {
 	@Test
 	@Ignore
 	public void testAutoCreateFilesFalse() throws IOException {
-		assertFalse(((GoogleStorageResourceObject) this.googleStorageResource)
-				.isCreateBlobIfNotExists());
+		assertFalse(((GoogleStorageResource) this.googleStorageResource)
+				.isAutoCreateFiles());
 	}
 
 	@SpringBootApplication(exclude = {
