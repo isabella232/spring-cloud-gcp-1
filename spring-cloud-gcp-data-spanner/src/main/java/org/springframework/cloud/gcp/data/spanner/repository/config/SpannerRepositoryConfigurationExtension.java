@@ -39,7 +39,7 @@ public class SpannerRepositoryConfigurationExtension
 	}
 
 	@Override
-	public String getRepositoryFactoryBeanClassName() {
+	public String getRepositoryFactoryClassName() {
 		return SpannerRepositoryFactoryBean.class.getName();
 	}
 
