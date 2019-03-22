@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.contrib.json.classic.JsonLayout;
 import com.google.gson.Gson;
 
+import org.springframework.boot.json.GsonJsonParser;
 import org.springframework.cloud.gcp.core.DefaultGcpProjectIdProvider;
 import org.springframework.cloud.gcp.core.GcpProjectIdProvider;
 import org.springframework.util.StringUtils;
@@ -40,6 +41,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Andreas Berger
  * @author Chengyuan Zhao
+ * @author Stefan Dieringer
  */
 public class StackdriverJsonLayout extends JsonLayout {
 
@@ -48,6 +50,8 @@ public class StackdriverJsonLayout extends JsonLayout {
 			StackdriverTraceConstants.MDC_FIELD_SPAN_ID,
 			StackdriverTraceConstants.MDC_FIELD_SPAN_EXPORT));
 
+	private static final String SERVICE_CONTEXT_ATTR_NAME = "serviceContext";
+
 	private String projectId;
 
 	private boolean includeTraceId;
@@ -55,6 +59,10 @@ public class StackdriverJsonLayout extends JsonLayout {
 	private boolean includeSpanId;
 
 	private boolean includeExceptionInMessage;
+
+	private StackdriverServiceContext serviceContext;
+
+	private Map<String, Object> customJson;
 
 	/**
 	 * creates a layout for a Logback appender compatible to the Stackdriver log format.
@@ -133,6 +141,23 @@ public class StackdriverJsonLayout extends JsonLayout {
 		this.includeExceptionInMessage = includeExceptionInMessage;
 	}
 
+	/**
+	 * set the service context for stackdriver.
+	 * @param serviceContext the service context
+	 */
+	public void setServiceContext(StackdriverServiceContext serviceContext) {
+		this.serviceContext = serviceContext;
+	}
+
+	/**
+	 * set custom json data to include in log output.
+	 * @param json json string
+	 */
+	public void setCustomJson(String json) {
+		GsonJsonParser parser = new GsonJsonParser();
+		this.customJson = parser.parseMap(json);
+	}
+
 	@Override
 	public void start() {
 		super.start();
@@ -192,13 +217,22 @@ public class StackdriverJsonLayout extends JsonLayout {
 		addTraceId(event, map);
 		add(StackdriverTraceConstants.SPAN_ID_ATTRIBUTE, this.includeSpanId,
 				event.getMDCPropertyMap().get(StackdriverTraceConstants.MDC_FIELD_SPAN_ID), map);
+		if (this.serviceContext != null) {
+			map.put(SERVICE_CONTEXT_ATTR_NAME, this.serviceContext);
+		}
+		if (this.customJson != null && !this.customJson.isEmpty()) {
+			for (Map.Entry<String, Object> entry : this.customJson.entrySet()) {
+				map.putIfAbsent(entry.getKey(), entry.getValue());
+			}
+		}
 		addCustomDataToJsonMap(map, event);
 		return map;
 	}
 
 	protected String formatTraceId(final String traceId) {
 		// Trace IDs are either 64-bit or 128-bit, which is 16-digit hex, or 32-digit hex.
-		// If traceId is 64-bit (16-digit hex), then we need to prepend 0's to make a 32-digit hex.
+		// If traceId is 64-bit (16-digit hex), then we need to prepend 0's to make a 32-digit
+		// hex.
 		if (traceId != null && traceId.length() == 16) {
 			return "0000000000000000" + traceId;
 		}
@@ -210,8 +244,7 @@ public class StackdriverJsonLayout extends JsonLayout {
 			return;
 		}
 
-		String traceId =
-				event.getMDCPropertyMap().get(StackdriverTraceConstants.MDC_FIELD_TRACE_ID);
+		String traceId = event.getMDCPropertyMap().get(StackdriverTraceConstants.MDC_FIELD_TRACE_ID);
 		if (traceId == null) {
 			traceId = TraceIdLoggingEnhancer.getCurrentTraceId();
 		}
